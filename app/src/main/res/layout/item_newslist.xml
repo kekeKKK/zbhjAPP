@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+    android:padding="5dp">
+
+    <!--新闻图标-->
+    <ImageView
+        android:id="@+id/item_newslist_icon"
+        android:padding="0.5dp"
+        android:layout_centerVertical="true"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_alignParentLeft="true"
+        android:src="@mipmap/ic_launcher"/>
+
+    <!--新闻标题与时间-->
+    <LinearLayout
+        android:layout_marginLeft="8dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/item_newslist_icon">
+
+        <TextView
+            android:id="@+id/item_newslist_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AAAAAAAAAAAAAAAAAAAAAAAAA"
+            android:textSize="18sp"
+            android:textColor="#88000000"
+            android:lines="2"/>
+
+        <TextView
+            android:layout_marginTop="2dp"
+            android:id="@+id/item_newslist_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#66000000"
+            android:text="2015年2月20号"/>
+    </LinearLayout>
+
+    <!--评论-->
+    <ImageView
+        android:id="@+id/item_newslist_comment"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/icon_news_comment_num"/>
+
+
+</RelativeLayout>

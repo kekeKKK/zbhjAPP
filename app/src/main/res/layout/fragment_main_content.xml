@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+    <!--下部分-->
+    <RadioGroup
+        android:id="@+id/content_rg"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:layout_alignParentBottom="true"
+        android:background="@mipmap/bottom_tab_bg"
+        android:orientation="horizontal"
+        >
+
+        <RadioButton
+            android:id="@+id/content_home_rb"
+            style="@style/ContentRbStyle"
+            android:drawableTop="@drawable/content_home_selector"
+            android:text="首页"
+            />
+
+        <RadioButton
+            android:id="@+id/content_newscenter_rb"
+            style="@style/ContentRbStyle"
+            android:drawableTop="@drawable/content_newscenter_selector"
+            android:text="新闻中心"
+            />
+
+        <RadioButton
+            android:id="@+id/content_smartservice_rb"
+            style="@style/ContentRbStyle"
+            android:drawableTop="@drawable/content_smartservice_selector"
+            android:text="智慧服务"
+            />
+
+        <RadioButton
+            android:id="@+id/content_govaffairs_rb"
+            style="@style/ContentRbStyle"
+            android:drawableTop="@drawable/content_govaffairs_selector"
+            android:text="政务"
+            />
+
+        <RadioButton
+            android:id="@+id/content_setting_rb"
+            style="@style/ContentRbStyle"
+            android:drawableTop="@drawable/content_setting_selector"
+            android:text="设置"
+            />
+
+
+    </RadioGroup>
+
+    <!--上部分-->
+    <com.itheima.zbhjapp.view.NoScrollViewPager
+        android:id="@+id/content_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/content_rg"
+        />
+
+
+</RelativeLayout>
