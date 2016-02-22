@@ -1,17 +1,19 @@
 package com.itheima.zbhjapp.controller.newsmenu.newslist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,11 +29,14 @@ import com.itheima.zbhjapp.bean.NewsCenterBean;
 import com.itheima.zbhjapp.bean.NewsListBean;
 import com.itheima.zbhjapp.controller.newsmenu.MenuController;
 import com.itheima.zbhjapp.controller.newsmenu.NewsMenuController;
+import com.itheima.zbhjapp.ui.DetailNewsUI;
 import com.itheima.zbhjapp.utils.DensityUtil;
 import com.itheima.zbhjapp.utils.MyConstants;
 import com.itheima.zbhjapp.utils.SpUtil;
 import com.itheima.zbhjapp.view.TouchViewPager;
 import com.squareup.picasso.Picasso;
+
+import org.itheima19.library.RefreshListView;
 
 import java.util.List;
 
@@ -62,7 +67,10 @@ public class NewsListController extends MenuController implements NewsMenuContro
     private List<NewsListBean.NewsListTopicBean> mTopic;
     private List<NewsListBean.NewsListTopNewsBean> mTopnews;
     private TopNewsAutoLoop mAutoLoop;
-    private ListView mNewsListListview;
+    private RefreshListView mNewsListListview;
+    private NewsListBean.NewsListDataBean mDatas;
+    private String mMoreUrl;
+    private NewsAdapter mNewsAdapter;
 
     public NewsListController(Context context, NewsCenterBean.NewsCenterChild child) {
         super(context);
@@ -77,11 +85,13 @@ public class NewsListController extends MenuController implements NewsMenuContro
 
         ButterKnife.bind(this, headView);
 
-        mNewsListListview = (ListView) listView.findViewById(R.id.newslist_listview);
-
+        mNewsListListview = (RefreshListView) listView.findViewById(R.id.newslist_listview);
 
         //给ListView添加头
         mNewsListListview.addHeaderView(mNewslistRl);
+
+        //给ListView添加监听事件
+        mNewsListListview.addOnRefreshListener(new MyOnRefreshListener());
 
         return listView;
     }
@@ -123,9 +133,10 @@ public class NewsListController extends MenuController implements NewsMenuContro
     private void processData(String response) {
         Gson gson = new Gson();
         NewsListBean bean = gson.fromJson(response, NewsListBean.class);
-        mNews = bean.data.news;
-        mTopic = bean.data.topic;
-        mTopnews = bean.data.topnews;
+        mDatas = bean.data;
+        mNews = mDatas.news;
+        mTopic = mDatas.topic;
+        mTopnews = mDatas.topnews;
 
         //动态添加小圆点
         addTopNewsDots();
@@ -147,7 +158,29 @@ public class NewsListController extends MenuController implements NewsMenuContro
      * 新闻列表的ListView初始化
      */
     private void iniListView() {
-        mNewsListListview.setAdapter(new NewsAdapter());
+        mNewsAdapter = new NewsAdapter();
+        mNewsListListview.setAdapter(mNewsAdapter);
+
+        //设置ListView的Item的点击事件
+        mNewsListListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //点击加载的footer
+                if(position == mNewsAdapter.getCount()+2){
+                    return;
+                }
+                //需要将每个条目的具体信息的Url传递给新的Acitivity,即具体新闻界面
+                //下拉头与ViewPager头都是在ListView中,点击时不能算进去
+                String detailNewsUrl = mNews.get(position-2).url;
+                Intent intent = new Intent(mContext,DetailNewsUI.class);
+                intent.putExtra(MyConstants.DETAILEDNEWSURL,detailNewsUrl);
+
+                mContext.startActivity(intent);
+
+                Toast.makeText(mContext, "count = "+mNewsAdapter.getCount()+"_position:" + position, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     public class NewsAdapter extends BaseAdapter {
@@ -358,6 +391,77 @@ public class NewsListController extends MenuController implements NewsMenuContro
 
         @Override
         public void onPageScrollStateChanged(int state) {
+
+        }
+    }
+
+    /**
+     * 下拉刷新与上拉加载更多的监听类
+     */
+    private class MyOnRefreshListener implements RefreshListView.OnRefreshListener {
+        @Override
+        public void onRefreshing() {
+            //刷新重新从网络加载数据
+            //网络请求数据
+            final String url = MyConstants.URL.BASEURL + mChild.url;
+            Volley.newRequestQueue(mContext).add(new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //缓存数据
+                    SpUtil.putString(mContext, url, response);
+
+                    //解析数据
+                    processData(response);
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(mContext, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+            }));
+
+            Log.d(TAG, "数据刷新加载完成..");
+            mNewsListListview.refreshFinish();
+
+        }
+
+        @Override
+        public void onLoadingMore() {
+            mMoreUrl = mDatas.more;
+            if(TextUtils.isEmpty(mMoreUrl)){
+                //没有更多内容可以加载了
+                mNewsListListview.refreshFinish(true);
+                return;
+            }
+
+            mMoreUrl = mMoreUrl.replace(MyConstants.URL.OLDBASEURL,MyConstants.URL.BASEURL);
+            final String url = mMoreUrl + MyConstants.URL.BASEURL;
+
+            Volley.newRequestQueue(mContext).add(new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Gson gson = new Gson();
+                    NewsListBean bean = gson.fromJson(response, NewsListBean.class);
+                    //一层层获取加载更多的url
+                    mMoreUrl = bean.data.more;
+                    List<NewsListBean.NewsListNewsBean> loadNews = bean.data.news;
+
+                    //将加载的数据添加到原来的集合中
+                    mNews.addAll(loadNews);
+                    //通知刷新UI
+                    mNewsAdapter.notifyDataSetChanged();
+
+                    mNewsListListview.refreshFinish(true);
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(mContext, "网络异常", Toast.LENGTH_SHORT).show();
+                    mNewsListListview.refreshFinish(true);
+                }
+            }));
 
         }
     }

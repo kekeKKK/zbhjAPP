@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -26,6 +27,7 @@ import com.itheima.zbhjapp.utils.SpUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * @Author: LiuKe
@@ -75,15 +77,15 @@ public class NewsCenterController extends TabController {
 
         //2.延时加载,设置时间阀值
         String data = SpUtil.getString(mContext, MyConstants.URL.NEWSCENTERURL, null);
-        if(!TextUtils.isEmpty(data)){
+        if (!TextUtils.isEmpty(data)) {
             //判断缓存保存时间是否超时
-            long saveTime = SpUtil.getLong(mContext,MyConstants.CACHESAVETIME,0);
+            long saveTime = SpUtil.getLong(mContext, MyConstants.CACHESAVETIME, 0);
 
-            if((saveTime+MyConstants.CACHEDATADELAY) < System.currentTimeMillis()){
-          //      Log.d(TAG,"缓存数据超时,需要重新请求数据");
+            if ((saveTime + MyConstants.CACHEDATADELAY) < System.currentTimeMillis()) {
+                //      Log.d(TAG,"缓存数据超时,需要重新请求数据");
                 processData(data);
-            }else{
-            //    Log.d(TAG,"只加载缓存");
+            } else {
+                //    Log.d(TAG,"只加载缓存");
                 processData(data);
                 return;
             }
@@ -91,6 +93,19 @@ public class NewsCenterController extends TabController {
 
 
         loadNetNewsData();
+
+
+        /**
+         * 设置组图图标点击事件
+         */
+        mIvListOrGrid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                notifyOnIconClick(mIvListOrGrid);
+
+              //  mListener.click(mIvListOrGrid);
+            }
+        });
 
 
     }
@@ -103,14 +118,14 @@ public class NewsCenterController extends TabController {
 
                 processData(response);
 
-            //    Log.d(TAG, "新闻数据:" + response);
+                //    Log.d(TAG, "新闻数据:" + response);
 
                 //将请求到的新闻数据缓存
                 SpUtil.putString(mContext, MyConstants.URL.NEWSCENTERURL, response);
                 //保存缓存存储时间
-                SpUtil.putLong(mContext,MyConstants.CACHESAVETIME,System.currentTimeMillis());
+                SpUtil.putLong(mContext, MyConstants.CACHESAVETIME, System.currentTimeMillis());
 
-             //   Log.d(TAG,"=====新闻数据缓存");
+                //   Log.d(TAG,"=====新闻数据缓存");
 
             }
         }, new Response.ErrorListener() {
@@ -145,13 +160,15 @@ public class NewsCenterController extends TabController {
 
             switch (type) {
                 case 1:  //新闻菜单
-                    menuController = new NewsMenuController(mContext,mNewsCenterMenus);
+                    menuController = new NewsMenuController(mContext, mNewsCenterMenus);
                     break;
                 case 10: //专题菜单
                     menuController = new TopicMenuController(mContext);
                     break;
                 case 2:  //组图菜单
                     menuController = new PicsMenuController(mContext);
+                    //添加监听
+                    addOnIconClickListener((PicsMenuController)menuController);
                     break;
                 case 3:  //互动菜单
                     menuController = new InteractMenuController(mContext);
@@ -165,11 +182,12 @@ public class NewsCenterController extends TabController {
     }
 
     /**
-     * 点击左侧菜单ListView时候,新闻中心界面相应改变
+     * 点击左侧菜单ListView时候,新闻中心界面相应切换
+     *
      * @param position 菜单ListView item position
      */
     @Override
-    public void switchContent(int position){
+    public void switchContent(int position) {
 
         //设置标题
         mTitle.setText(mNewsCenterMenus.get(position).title);
@@ -184,7 +202,45 @@ public class NewsCenterController extends TabController {
         //加载数据
         menuController.initData();
 
+        //在切换到组图时,显示图标
+
+        mIvListOrGrid.setVisibility(menuController instanceof PicsMenuController ? View.VISIBLE : View.GONE);
+
     }
+
+    private List<iconClickListener> mListeners = new ArrayList<iconClickListener>();
+    /**
+     * 组图点击回调接口
+     */
+    public interface iconClickListener{
+        void click(ImageView iv);
+    }
+
+    public void addOnIconClickListener(iconClickListener listener){
+        if(!mListeners.contains(listener)){
+            mListeners.add(listener);
+        }
+    }
+
+    public void removeOnIconClickListener(iconClickListener listener){
+        mListeners.remove(listener);
+    }
+
+        public void notifyOnIconClick(ImageView ivListOrGrid){
+        ListIterator<iconClickListener> iterator = mListeners.listIterator();
+        while(iterator.hasNext()){
+            iconClickListener listener = iterator.next();
+            listener.click(ivListOrGrid);
+        }
+
+    }
+
+    private iconClickListener mListener;
+    //不用观察者模式也可以只用一个set方法既可
+    public void setOnIconClickListener(iconClickListener listener){
+        mListener = listener;
+    }
+
 
 
 }

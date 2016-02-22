@@ -3,11 +3,14 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
-    <ListView
+
+    <!--含有下下拉刷新的自定义控件-->
+
+    <org.itheima19.library.RefreshListView
         android:id="@+id/newslist_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none">
-    </ListView>
+    </org.itheima19.library.RefreshListView>
 
 </LinearLayout>

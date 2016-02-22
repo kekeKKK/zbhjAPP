@@ -1,2 +1,2 @@
-include ':app', ':sliding_menu', ':volley-master'
+include ':app', ':sliding_menu', ':volley-master', ':RefreshListView'
 include ':ViewPagerIndicator'

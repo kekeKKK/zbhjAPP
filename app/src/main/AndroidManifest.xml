@@ -19,6 +19,7 @@
         </activity>
         <activity android:name=".ui.GuideUI"/>
         <activity android:name=".ui.MainUI"/>
+        <activity android:name=".ui.DetailNewsUI"/>
     </application>
 
 </manifest>

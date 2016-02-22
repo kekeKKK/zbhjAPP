@@ -21,6 +21,7 @@ public abstract class TabController{
     public ImageView mIv;
     public TextView mTitle;
     public FrameLayout mContentContainer;
+    public ImageView mIvListOrGrid;
 
     public Context mContext;
 
@@ -40,6 +41,7 @@ public abstract class TabController{
         mIv = (ImageView) mRootView.findViewById(R.id.tab_iv);
         mTitle = (TextView) mRootView.findViewById(R.id.tab_title);
         mContentContainer = (FrameLayout) mRootView.findViewById(R.id.tab_content_container);
+        mIvListOrGrid = (ImageView) mRootView.findViewById(R.id.tab_iv_listorgrid);
 
         //设置标题栏
         initTitleBar();

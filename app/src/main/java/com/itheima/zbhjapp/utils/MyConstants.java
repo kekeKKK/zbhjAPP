@@ -28,6 +28,16 @@ public interface MyConstants {
      */
     String ISFIRSTGUIDE = "isfirstguide";
 
+    /**
+     * 新闻详情的url标示
+     */
+    String DETAILEDNEWSURL = "detailednewsurl";
+
+    /**
+     * 新闻字体大小
+     */
+    String TEXTSIZE = "textsize";
+
     public static interface URL{
         String BASEURL =  "http://188.188.5.14:8080/zhbj";
         String NEWSCENTERURL = BASEURL+"/categories.json";

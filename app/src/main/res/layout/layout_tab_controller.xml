@@ -21,6 +21,14 @@
             android:text="标题"
             android:textSize="28sp"
             android:textColor="#fff"/>
+        <ImageView
+            android:id="@+id/tab_iv_listorgrid"
+            android:layout_alignParentRight="true"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="center"
+            android:src="@mipmap/icon_pic_grid_type"
+            android:visibility="gone"/>
     </RelativeLayout>
 
     <FrameLayout

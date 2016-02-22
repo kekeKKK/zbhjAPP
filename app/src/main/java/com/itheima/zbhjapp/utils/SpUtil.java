@@ -45,7 +45,7 @@ public class SpUtil {
         sp.edit().putInt(key,value).commit();
     }
 
-    public static long getInt(Context context,String key,int defValue){
+    public static int getInt(Context context,String key,int defValue){
         SharedPreferences sp = context.getSharedPreferences(MyConstants.CONFIGFILE, Context.MODE_PRIVATE);
         return sp.getInt(key, defValue);
     }
